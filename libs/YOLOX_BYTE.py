@@ -174,7 +174,7 @@ def loadPredictor(args):
 class YoloDevice:
     def __init__(self, video_url="", output_dir="", run=True, auto_restart=False, repeat=False, obj_trace = False,
                  display_message=True, data_file="", config_file="", weights_file="", 
-                 names_file="", thresh=0.1, vertex=None, target_classes=None, draw_bbox=True, draw_polygon=True, draw_square=True,
+                 names_file="", thresh=0.1, vertex=None, target_classes=None, draw_bbox=True, draw_polygon=True, draw_square=False,
                  draw_socialDistanceArea=False, draw_socialDistanceInfo=False,  social_distance=False, draw_pose=False, count_people=False, draw_peopleCounting=False,
                  alias="", group="", place="", cam_info="", warning_level=None, is_threading=True, skip_frame=None,
                  schedule=[], save_img=True, save_original_img=False, save_video=False, save_video_original=False, testMode=False, gpu=0, args=None,
@@ -527,8 +527,9 @@ class YoloDevice:
                 self.drawImage = draw_polylines(self.drawImage, self.vertex)  # draw the polygon
                 
             if self.draw_square:
-                cv2.polylines(self.drawImage, pts=[self.countOutArea], isClosed=True, color=(255,0,0), thickness=3)#draw square area
-                cv2.polylines(self.drawImage, pts=[self.countInArea_cal], isClosed=True, color=(0,0,255), thickness=3)#draw square area
+                pass
+                # cv2.polylines(self.drawImage, pts=[self.countOutArea], isClosed=True, color=(255,0,0), thickness=3)#draw square area
+                # cv2.polylines(self.drawImage, pts=[self.countInArea_cal], isClosed=True, color=(0,0,255), thickness=3)#draw square area
                 
                 
             if self.draw_socialDistanceArea:

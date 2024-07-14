@@ -222,7 +222,7 @@ class Tracker():
         
         dets = np.array(dets, dtype=float)
         
-        online_targets = self.tracker.update(dets, [1080, 1920], [1080, 1920])
+        online_targets = self.tracker.update(dets, [1520, 2704], [1520, 2704])
         
         detWithID = []
         for track in online_targets:
