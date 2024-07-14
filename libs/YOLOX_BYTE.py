@@ -8,7 +8,7 @@ import shutil
 import threading
 import  random
 import sys
-sys.path.append("/home/alvin/TraceTalk/ByteTrack")
+sys.path.append("/content/TraceTalk/ByteTrack")
 
 from tqdm import tqdm
 import pathlib
@@ -30,8 +30,12 @@ from ByteTrack.yolox.exp import get_exp
 from libs.utils import *
 
 from darknet import darknet
+import logging
 
+logging.basicConfig(filename='log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
 
+def log_print(message):
+    logging.info(message)
 
 
 class Predictor(object):
@@ -170,7 +174,7 @@ def loadPredictor(args):
 class YoloDevice:
     def __init__(self, video_url="", output_dir="", run=True, auto_restart=False, repeat=False, obj_trace = False,
                  display_message=True, data_file="", config_file="", weights_file="", 
-                 names_file="", thresh=0.5, vertex=None, target_classes=None, draw_bbox=True, draw_polygon=True, draw_square=True,
+                 names_file="", thresh=0.1, vertex=None, target_classes=None, draw_bbox=True, draw_polygon=True, draw_square=True,
                  draw_socialDistanceArea=False, draw_socialDistanceInfo=False,  social_distance=False, draw_pose=False, count_people=False, draw_peopleCounting=False,
                  alias="", group="", place="", cam_info="", warning_level=None, is_threading=True, skip_frame=None,
                  schedule=[], save_img=True, save_original_img=False, save_video=False, save_video_original=False, testMode=False, gpu=0, args=None,
@@ -239,7 +243,7 @@ class YoloDevice:
         self.bbox_colors = {}
         
         # Video initilize
-        self.frame = np.zeros((1080,1920,4))
+        self.frame = np.zeros((1520,2704,4))
         self.drawImage = None
         self.cap = cv2.VideoCapture(self.video_url)        
         self.ret = False
@@ -284,7 +288,10 @@ class YoloDevice:
             self.countOutArea = np.array([[0, 1080],[0, 0],[877, 0],[1019, 257],[1007, 360],[1177, 501],[1165, 595],[1512, 962],[1609, 578], [1980, 728], [1980, 1080]])#Make the area of bottom lower because some people walk in from there. If not making lower, system will count those person
             self.suspiciousArea = np.array([[1070, 589],[846, 590],[890, 684],[1024, 732],[1129, 905],[1350, 927]])#This area use to handle occlusion when people get in square
             
-            self.vertex = [[180, 873],[483, 266],[1124, 289],[1769, 870]]
+        elif "0603__12__1"  in video_url:
+            self.countInArea_cal = np.array([ [0, 0],[0, 2704],[2704, 1520],[0, 1520] ])#Make the area of bottom lower because some people walk in from there. If not making lower, system will count those person
+            self.countOutArea = np.array([ [0, 0],[0, 2704],[2704, 1520],[0, 1520] ])#Make the area of bottom lower because some people walk in from there. If not making lower, system will count those person
+            self.suspiciousArea = np.array([ [0, 0],[0, 2704],[2704, 1520],[0, 1520] ])#This area use to handle occlusion when people get in square
         elif "入口人流Oct25" in video_url:
             self.countInArea_cal = np.array([[1719, 1513], [1749, 910], [2551, 913], [2606, 1327]])#Make the area of bottom lower because some people walk in from there. If not making lower, system will count those person
             self.countOutArea = np.array([[1656, 1634], [1714, 841], [2583, 828], [2655, 1418]])#Make the area of bottom lower because some people walk in from there. If not making lower, system will count those person
@@ -484,10 +491,11 @@ class YoloDevice:
                 outputs, img_info = self.predictor.inference(self.frame, self.timer)
                 if outputs[0] is not None:
                     for x1, y1, x2, y2, obj_conf, class_conf, class_pred in outputs[0].cpu().detach().numpy():
-                        x1 = x1 / 800 * self.H
-                        y1 = y1 / 1440 * self.W
-                        x2 = x2 / 800 * self.H
-                        y2 = y2 / 1440 * self.W
+                        # print(x1, y1, x2, y2)
+                        # x1 = x1 / 1520 * self.H
+                        # y1 = y1 / 2704 * self.W
+                        # x2 = x2 / 1520 * self.H
+                        # y2 = y2 / 2704 * self.W
                         w = x2 - x1
                         h = y2 - y1
                         cx = x1 + w / 2
@@ -495,8 +503,8 @@ class YoloDevice:
                         detections.append([class_pred, obj_conf, (cx, cy, w, h)])
             
                 
-                self.detect_target = detections
-                
+                self.detect_target = [detection for detection in detections if detection[1] >= self.thresh]
+                # self.detect_target = detections
                 # filter the scope and target class   
                 # self.detect_target = detect_filter(detections, self.target_classes, self.vertex, True)
                 
@@ -506,6 +514,7 @@ class YoloDevice:
             
             predict_time_sum +=  (time.time() - predict_time) # add sum predict time
             
+            log_print(f"frame{self.frame_id}: {self.detect_target}\n")
             self.drawImage = drawTracks(self.drawImage, self.detect_target)
             
             save_path_img = None
@@ -968,7 +977,7 @@ class YoloDevice:
                                         random.randint(0, 255),
                                         random.randint(0, 255))
             # save results
-            detWithID.append(['person', track.score, [cx, cy, w, h], id, [cx, cy + w / 2]])
+            detWithID.append(['fish', track.score, [cx, cy, w, h], id, [cx, cy + w / 2]])
 
         return detWithID
 
@@ -1131,7 +1140,7 @@ class YoloDevice:
         self.testWithTxt = testWithTxt
         if self.testWithTxt:
             self.txtDets = getNpData(txtFile)
-        
+
         groundTruth = []#number of people get in square
         predictNumber = []
         error = []
