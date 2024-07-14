@@ -1,5 +1,5 @@
 import sys
-sys.path.append("/home/alvin/TraceTalk/")
+sys.path.append("/content/TraceTalk/")
 from libs.YOLOX_BYTE import YoloDevice
 import argparse
 from pathlib import Path
@@ -11,7 +11,7 @@ def make_parser():
     parser = argparse.ArgumentParser("TraceTalk Test")
     
     parser.add_argument('--video', type=str, required=True,  help='video file or folder')
-    parser.add_argument('--yolo_thresh', type=float, default=0.4,  help='yolo threshold')
+    parser.add_argument('--yolo_thresh', type=float, default=0.1,  help='yolo threshold')
     parser.add_argument('--no_save_video',action='store_false' , help='save video')
     
     parser.add_argument("-expn", "--experiment-name", type=str, default=None)
@@ -70,12 +70,12 @@ def make_parser():
     # tracking args
     parser.add_argument("--track_thresh", type=float, default=0.5, help="tracking confidence threshold")
     parser.add_argument("--track_buffer", type=int, default=30, help="the frames for keep lost tracks")
-    parser.add_argument("--match_thresh", type=float, default=0.8, help="matching threshold for tracking")
+    parser.add_argument("--match_thresh", type=float, default=0.9, help="matching threshold for tracking")
     parser.add_argument(
-        "--aspect_ratio_thresh", type=float, default=1.6,
+        "--aspect_ratio_thresh", type=float, default=5,
         help="threshold for filtering out boxes of which aspect ratio are above the given value."
     )
-    parser.add_argument('--min_box_area', type=float, default=10, help='filter out tiny boxes')
+    parser.add_argument('--min_box_area', type=float, default=500, help='filter out tiny boxes')
     parser.add_argument("--mot20", dest="mot20", default=False, action="store_true", help="test mot20.")
     parser.add_argument("--exp", default="", help="video save folder")
     return parser
@@ -96,7 +96,7 @@ yolo1 = YoloDevice(
         alias=Path(args.video).name,
         display_message = False,
         obj_trace = True,        
-        save_img = False,
+        save_img = True,
         save_video = args.no_save_video,        
         # target_classes=["person"],
         auto_restart = True,
@@ -104,7 +104,7 @@ yolo1 = YoloDevice(
         count_people=True,
         draw_peopleCounting=True,
         draw_pose=True,
-        social_distance=True,
+        social_distance=False,
         draw_socialDistanceInfo=True,
         testMode=True,
         repeat=False,
@@ -115,7 +115,7 @@ yolo1 = YoloDevice(
     
 #config of BYTE tracker
 class Arg():
-    def __init__(self, track_thresh=0.6, track_buffer=30, match_thresh=0.9, yolo_thresh=0.4):
+    def __init__(self, track_thresh=0.6, track_buffer=30, match_thresh=0.9, yolo_thresh=0.1):
         self.track_thresh = track_thresh
         self.track_buffer = track_buffer
         self.match_thresh = match_thresh
