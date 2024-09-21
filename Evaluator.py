@@ -158,8 +158,8 @@ def calculate_id_switches(detection, iou_threshold=0.65):
 
 # Main function
 if __name__ == "__main__":
-    ground_truth_file = r"C:/Users/HarryLo/Desktop/labelT"  # update with the correct path
-    detection_file = r"C:/Users/HarryLo/Desktop/detections.txt"
+    ground_truth_file = r"/content/TraceTalk/ByteTrack/datasets/zebrafish/ZebraFish-10/labelT"  # update with the correct path
+    detection_file = r""/content/TraceTalk/log.txt"
 
     ground_truth = parse_gt_detections(ground_truth_file)
     detection = parse_detections(detection_file)
